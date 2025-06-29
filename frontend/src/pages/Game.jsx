@@ -100,6 +100,15 @@ function Game() {
               }}
               boardWidth={400}
               boardOrientation={orientation}
+              isDraggablePiece={({ piece}) => {
+                if (!game) return false;
+                const turn = game.turn();
+                
+    // Only allow dragging pieces if the orientation is white and piece is white
+                const playerColor = orientation === 'white' ? 'w' : 'b';
+                 return turn === playerColor && piece.startsWith(playerColor);
+
+              }}
             />
             <br></br>
             <br></br>
