@@ -43,14 +43,17 @@ wss.on('connection', (socket)=>{
 
         if(message.type==='move'){
             const clients = rooms.get(message.roomid);
-            clients.forEach((client)=>{
-                if(client!==socket){
-                    client.send(JSON.stringify({
-                        type: 'move',
-                        move: message.move,
-                    }))
+            clients.forEach((client) => {
+                if (client !== socket && client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({
+                    type: 'move',
+                    move: message.move,
+                    result: message.result || null, 
+                    winner: message.winner
+                }));
                 }
-            })
+            });
+            
         }
 
     })

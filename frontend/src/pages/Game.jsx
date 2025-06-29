@@ -17,6 +17,11 @@ function Game() {
     const name = searchParams.get('name');
     const roomid = searchParams.get('id');
 
+    const [iswon, setiswon] = useState(false);
+    const [isdraw, setisdraw] = useState(false);
+    const [isStalemate, setisstalemate]  = useState(false);
+    const [winner, setwinner] = useState('');
+
     const handleSideSelect = (side) => {
       const chess = new Chess();
       setgame(chess);
@@ -26,14 +31,30 @@ function Game() {
 
     const handlemove = (from, to)=>{
       const move = game.move({ from, to, promotion: "q" });
+      let result = null
       if (move){
         setFen(game.fen())
+        if(game.isCheckmate()){
+          result = 'won'
+          setiswon(true)
+          setwinner(name);
+        }
+        if(game.isDraw()){
+          setisdraw(true)
+          result = 'draw'
+        }
+        if(game.isStalemate()){
+          setisstalemate(true);
+          result = 'stalemate'
+        }
         socket.send(JSON.stringify({
-          move: move,
+          move: { from, to, promotion: "q" },
           type: 'move',
-          roomid: roomid
+          roomid: roomid,
+          result:result,
+          winner: winner,
         }))
-      } ;
+      } 
       return !!move
     }
     useEffect(()=>{
@@ -55,7 +76,7 @@ function Game() {
           setopponent(message.opponent[0])
         }
         if(message.type==='move'){
-          
+
           setgame(currentGame => {
             if (!currentGame) {
           // Initialize game if not already done
@@ -66,7 +87,22 @@ function Game() {
             const newGame = new Chess(currentGame.fen());
             newGame.move(message.move);
             return newGame;
-      });
+          });
+
+          
+          if(message.result==='won'){
+            setwinner(opponent);
+            setiswon(true);
+          }
+          else if(message.result ==='draw'){
+            
+            setisdraw(true);
+          }
+          else if(message.result ==='stalemate'){
+            
+            setisstalemate(true);
+          }
+          
 
         }
       }
@@ -114,6 +150,21 @@ function Game() {
             <br></br>
               <p>{name}</p>
           </div>
+        )}
+        {iswon && (
+          <>
+            <p>{winner} has won the game</p>
+          </>
+        )}
+        {isdraw && (
+          <>
+            <p>Draw between both the players</p>
+          </>
+        )}
+        {isStalemate && (
+          <>
+            <p>Stalemate!!!!</p>
+          </>
         )}
     </div>
   )
