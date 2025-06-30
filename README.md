@@ -43,7 +43,7 @@ WEBRTC/
    touch .env
    npm start
    ```
-   The backend server will start on the port specified in your `.env` file (e.g., 8000).
+   The backend server will start on the port specified in your `.env` file (e.g., 8000). Here i have used the port 4000 for the backend websocketserver
 
 ### Frontend Setup
 1. Open a new terminal and navigate to the `frontend` folder:
