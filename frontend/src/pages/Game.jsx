@@ -9,6 +9,10 @@ function Game() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [socket, setsocket]  = useState(null);
 
+    const [iserror, setiserror] = useState(false);
+    const [errormessage, seterrormessage] = useState('');
+
+
     //game setup
     const [game,setgame] = useState(null);
     const [fen, setFen] = useState('start');
@@ -144,6 +148,10 @@ function Game() {
       }
       newsocket.onmessage = (msg)=>{
         const message = JSON.parse(msg.data);
+        if(message.type==='error'){
+          setiserror(true);
+          seterrormessage(message.msg);
+        }
         if(message.type==='opponent'){
           console.log("Got opponent:", message.opponent); 
           setopponent(message.opponent[0])
@@ -208,7 +216,12 @@ function Game() {
     }, [])
   return (
     <div className = 'bg-white h-screen flex flex-col items-center justify-center'>
-        {!game && (
+        {!game && iserror && (
+          <div className =  'bg-white shadow-md shadow-gray-400 h-30 w-90 text-center'>
+            <h1 className = 'text-red-700 font-semibold text-3xl mt-3'>{errormessage}</h1>
+          </div>
+        )}
+        {!game && !iserror && (
           <>
             <h2>Choose sides</h2>
             <br></br>
@@ -220,7 +233,7 @@ function Game() {
             }} className = 'bg-green-600 text-white px-5 py-2 rounded-md mr-2'>Black</button>
           </>
         )}
-        {game && (
+        {game && !iserror && (
           <div className = 'h-screen flex  flex-col items-center justify-center bg-white'>
             {isdrawnotification && (
               <>

@@ -29,8 +29,17 @@ wss.on('connection', (socket)=>{
             if(!rooms.has(roomid)){
                 rooms.set(roomid, new Set()); //create a room if it doesnt exist
             }
-            rooms.get(roomid).add(socket);
             const clients = rooms.get(roomid);
+            if(clients.size >= 2){
+                socket.send(JSON.stringify({
+                    type: 'error',
+                    msg: '2 people already exist in this room',
+                }))
+                return ;
+            }
+            clients.add(socket);
+
+            
             const names = Array.from(clients).map(client => client.name);
 
             clients.forEach((client)=>{
