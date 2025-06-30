@@ -55,6 +55,30 @@ wss.on('connection', (socket)=>{
             });
             
         }
+        if(message.type==='request'){
+            const clients = rooms.get(message.roomid);
+            clients.forEach((client)=>{
+                if(client!==socket && client.readyState===WebSocket.OPEN){
+                    client.send(JSON.stringify({
+                        type: 'response',
+                        msg: `${message.msg}. Would you linke to accept it`
+                    }))
+                }
+            })
+        }
+
+        if(message.type==='acceptance'){
+            const clients = rooms.get(message.roomid);
+            clients.forEach((client)=>{
+                if(client!==socket && client.readyState===WebSocket.OPEN){
+                    client.send(JSON.stringify({
+                        type: 'acceptance',
+                        msg: 'Accepted request to draw',
+                    }))
+
+                }
+            })
+        }
 
     })
     

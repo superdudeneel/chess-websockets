@@ -10,7 +10,7 @@ function Game() {
     const [socket, setsocket]  = useState(null);
 
     const [game,setgame] = useState(null);
-    const [fen, setFen] = useState("start");
+    const [fen, setFen] = useState('start');
     const [orientation, setorientation] = useState('white');
     const [opponent, setopponent] = useState('');
 
@@ -21,12 +21,45 @@ function Game() {
     const [isdraw, setisdraw] = useState(false);
     const [isStalemate, setisstalemate]  = useState(false);
     const [winner, setwinner] = useState('');
+    const [isdrawnotification, setisdrawnotification] = useState(false);
+    const [drawmessage, setdrawmessage]  = useState('');
+    const [drawrequest, setdrawrequest] = useState(false);
+
 
     const handleSideSelect = (side) => {
       const chess = new Chess();
       setgame(chess);
       setFen(chess.fen());
       setorientation(side)
+      setisdraw(false);
+      setisdrawnotification(false);
+      setdrawrequest(false);
+      
+
+    }
+
+    const handledraw = ()=>{
+      setdrawrequest(true);
+      const msgtosend = {
+        type: 'request',
+        msg: `${name} requests to draw`,
+        roomid: roomid,
+      }
+      socket.send(JSON.stringify(msgtosend))
+    }
+
+    const acceptdraw = ()=>{
+      setisdraw(true);
+      setisdrawnotification(false);
+
+      const msgtosend = {
+        type: 'acceptance',
+        roomid: roomid,
+      }
+      socket.send(JSON.stringify(msgtosend));
+      setgame(null);
+
+
     }
 
     const handlemove = (from, to)=>{
@@ -105,6 +138,17 @@ function Game() {
           
 
         }
+
+        if(message.type==='response'){
+          setisdrawnotification(true);
+          setdrawmessage(message.msg);
+
+        }
+        if(message.type==='acceptance'){
+          setisdraw(true);
+          setgame(null);
+
+        }
       }
       return ()=>{
         newsocket.close()
@@ -125,7 +169,16 @@ function Game() {
           </>
         )}
         {game && (
-          <div className = 'h-screen flex items-center justify-center bg-white'>
+          <div className = 'h-screen flex  flex-col items-center justify-center bg-white'>
+            {isdrawnotification && (
+              <>
+                <div className = 'bg-gray-100 text-gray-700 fixed h-20 w-140 flex mb-170 text-center'>
+                  <p>{drawmessage}</p>
+                  <button onClick = {acceptdraw} className = 'bg-green-600 text-white rounded-md mr-30 px-3 py-2 h-10 w-30 mt-5'>Accept</button>
+                  <button  className = 'bg-red-600 text-white rounded-md px-3 py-2 h-10 w-30 mt-5 mr-5'>Reject</button>
+                </div>
+              </>
+            )}
             <p className="mb-4 text-md text-gray-800">
               {opponent ? `Opponent: ${opponent}` : "Waiting for opponent..."}
             </p>
@@ -147,8 +200,8 @@ function Game() {
               }}
             />
             <br></br>
-            <br></br>
               <p>{name}</p>
+              <button onClick = {handledraw} className = 'bg-green-600 text-white px-5 py-2 rounded-md'>{drawrequest ? 'Sent..' : 'Draw'}</button>
           </div>
         )}
         {iswon && (
