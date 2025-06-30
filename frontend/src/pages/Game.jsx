@@ -52,7 +52,7 @@ function Game() {
           type: 'move',
           roomid: roomid,
           result:result,
-          winner: winner,
+          winner: name,
         }))
       } 
       return !!move
@@ -91,7 +91,7 @@ function Game() {
 
           
           if(message.result==='won'){
-            setwinner(opponent);
+            setwinner(message.winner);
             setiswon(true);
           }
           else if(message.result ==='draw'){
