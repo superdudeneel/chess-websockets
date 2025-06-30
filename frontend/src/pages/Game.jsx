@@ -225,8 +225,8 @@ function Game() {
             {isdrawnotification && (
               <>
                 <div className = 'bg-gray-100 text-gray-700 fixed h-20 w-140 flex mb-170 text-center'>
-                  <p>{drawmessage}</p>
-                  <button onClick = {acceptdraw} className = 'bg-green-600 text-white rounded-md mr-30 px-3 py-2 h-10 w-30 mt-5'>Accept</button>
+                  <p className = 'mt-5 ml-2 text-sm'>{drawmessage}</p>
+                  <button onClick = {acceptdraw} className = 'bg-green-600 text-white rounded-md mr-4 px-3 py-2 h-10 w-30 mt-5'>Accept</button>
                   <button onClick = {rejectdraw} className = 'bg-red-600 text-white rounded-md px-3 py-2 h-10 w-30 mt-5 mr-5'>Reject</button>
                 </div>
               </>
