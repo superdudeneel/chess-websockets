@@ -19,7 +19,7 @@ function Home() {
         }}>
         </input>
         <br></br>
-        <button onClick  = {handleclick} className = 'bg-blue-700 text-white rounded-md w-70 px-5 py-2'>Enter room</button>
+        <button onClick  = {handleclick} className = 'bg-green-700 cursor-pointer text-white rounded-md w-70 px-5 py-2'>Enter room</button>
     </div>
   )
 }

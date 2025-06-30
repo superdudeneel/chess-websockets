@@ -9,23 +9,35 @@ function Game() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [socket, setsocket]  = useState(null);
 
+    //game setup
     const [game,setgame] = useState(null);
     const [fen, setFen] = useState('start');
     const [orientation, setorientation] = useState('white');
     const [opponent, setopponent] = useState('');
 
+    //room
     const name = searchParams.get('name');
     const roomid = searchParams.get('id');
 
+    //states of chess winning and losing
     const [iswon, setiswon] = useState(false);
     const [isdraw, setisdraw] = useState(false);
     const [isStalemate, setisstalemate]  = useState(false);
+
+    //winner
     const [winner, setwinner] = useState('');
+
+    //draw 
     const [isdrawnotification, setisdrawnotification] = useState(false);
     const [drawmessage, setdrawmessage]  = useState('');
     const [drawrequest, setdrawrequest] = useState(false);
     const [rejectmessage, setrejectmessage] = useState('');
 
+    //resign
+    const [isresign, setisresign] = useState(false);
+    const [wonbyresign, setwonbyresign] = useState('');
+
+    
 
     const handleSideSelect = (side) => {
       const chess = new Chess();
@@ -35,7 +47,9 @@ function Game() {
       setisdraw(false);
       setisdrawnotification(false);
       setdrawrequest(false);
-      
+      setiswon(false);
+      setisresign(false);
+      setrejectmessage('');
 
     }
 
@@ -70,6 +84,19 @@ function Game() {
       const msgtosend = {
         type: 'rejection',
         roomid: roomid,
+      }
+      socket.send(JSON.stringify(msgtosend));
+
+    }
+
+    const handleresign = ()=>{
+      setisresign(true);
+      setgame(null);
+
+      const msgtosend = {
+        type: 'resign',
+        roomid: roomid,
+        msg: `${name} has resigned. You Have Won!!`
       }
       socket.send(JSON.stringify(msgtosend));
 
@@ -167,6 +194,13 @@ function Game() {
           setisdraw(false)
           setrejectmessage(message.msg)
         }
+        if(message.type==='resign'){
+          setgame(null);
+          setiswon(true);
+          setwinner(name);
+          setwonbyresign(message.msg);
+
+        }
       }
       return ()=>{
         newsocket.close()
@@ -220,11 +254,15 @@ function Game() {
             <br></br>
               <p>{name}</p>
               <p>{rejectmessage ? rejectmessage : ''}</p>
-              <button onClick = {handledraw} className = 'bg-green-600 text-white px-5 py-2 rounded-md'>{drawrequest ? 'Sent..' : 'Draw'}</button>
+              <div className = 'bg-white flex items-center justify-center gap-2 mt-2'>
+                <button onClick = {handledraw} className = 'bg-green-600 text-white px-5 py-2 rounded-md'>{drawrequest ? 'Sent..' : 'Draw'}</button>
+                <button onClick = {handleresign} className = 'bg-green-600 text-white px-5 py-2 rounded-md '>Resign</button>
+              </div>
           </div>
         )}
         {iswon && (
           <>
+            <p>{wonbyresign}</p>
             <p>{winner} has won the game</p>
           </>
         )}
@@ -236,6 +274,11 @@ function Game() {
         {isStalemate && (
           <>
             <p>Stalemate!!!!</p>
+          </>
+        )}
+        {isresign && (
+          <>
+            <p>You have lost the game by resigning</p>
           </>
         )}
     </div>

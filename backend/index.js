@@ -61,7 +61,7 @@ wss.on('connection', (socket)=>{
                 if(client!==socket && client.readyState===WebSocket.OPEN){
                     client.send(JSON.stringify({
                         type: 'response',
-                        msg: `${message.msg}. Would you linke to accept it`
+                        msg: `${message.msg}. Would you like to accept it`
                     }))
                 }
             })
@@ -86,6 +86,17 @@ wss.on('connection', (socket)=>{
                     client.send(JSON.stringify({
                         type: 'rejection',
                         msg: `${socket.name} has rejected your request`,
+                    }))
+                }
+            })
+        }
+        if(message.type==='resign'){
+            const clients = rooms.get(message.roomid);
+            clients.forEach((client)=>{
+                if(client!==socket){
+                    client.send(JSON.stringify({
+                        type: 'resign',
+                        msg: message.msg,
                     }))
                 }
             })
