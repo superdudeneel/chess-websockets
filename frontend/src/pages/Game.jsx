@@ -24,6 +24,7 @@ function Game() {
     const [isdrawnotification, setisdrawnotification] = useState(false);
     const [drawmessage, setdrawmessage]  = useState('');
     const [drawrequest, setdrawrequest] = useState(false);
+    const [rejectmessage, setrejectmessage] = useState('');
 
 
     const handleSideSelect = (side) => {
@@ -40,6 +41,8 @@ function Game() {
 
     const handledraw = ()=>{
       setdrawrequest(true);
+      setrejectmessage('');
+
       const msgtosend = {
         type: 'request',
         msg: `${name} requests to draw`,
@@ -59,6 +62,16 @@ function Game() {
       socket.send(JSON.stringify(msgtosend));
       setgame(null);
 
+
+    }
+    const rejectdraw = ()=>{
+      setisdrawnotification(false);
+      setisdraw(false);
+      const msgtosend = {
+        type: 'rejection',
+        roomid: roomid,
+      }
+      socket.send(JSON.stringify(msgtosend));
 
     }
 
@@ -149,6 +162,11 @@ function Game() {
           setgame(null);
 
         }
+        if(message.type==='rejection'){
+          setdrawrequest(false);
+          setisdraw(false)
+          setrejectmessage(message.msg)
+        }
       }
       return ()=>{
         newsocket.close()
@@ -175,7 +193,7 @@ function Game() {
                 <div className = 'bg-gray-100 text-gray-700 fixed h-20 w-140 flex mb-170 text-center'>
                   <p>{drawmessage}</p>
                   <button onClick = {acceptdraw} className = 'bg-green-600 text-white rounded-md mr-30 px-3 py-2 h-10 w-30 mt-5'>Accept</button>
-                  <button  className = 'bg-red-600 text-white rounded-md px-3 py-2 h-10 w-30 mt-5 mr-5'>Reject</button>
+                  <button onClick = {rejectdraw} className = 'bg-red-600 text-white rounded-md px-3 py-2 h-10 w-30 mt-5 mr-5'>Reject</button>
                 </div>
               </>
             )}
@@ -201,6 +219,7 @@ function Game() {
             />
             <br></br>
               <p>{name}</p>
+              <p>{rejectmessage ? rejectmessage : ''}</p>
               <button onClick = {handledraw} className = 'bg-green-600 text-white px-5 py-2 rounded-md'>{drawrequest ? 'Sent..' : 'Draw'}</button>
           </div>
         )}

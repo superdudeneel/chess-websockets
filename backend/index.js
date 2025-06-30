@@ -79,6 +79,17 @@ wss.on('connection', (socket)=>{
                 }
             })
         }
+        if(message.type==='rejection'){
+            const clients = rooms.get(message.roomid);
+            clients.forEach((client)=>{
+                if(client!==socket && client.readyState===WebSocket.OPEN){
+                    client.send(JSON.stringify({
+                        type: 'rejection',
+                        msg: `${socket.name} has rejected your request`,
+                    }))
+                }
+            })
+        }
 
     })
     
